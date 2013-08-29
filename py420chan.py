@@ -6,8 +6,8 @@ from collections import Counter
 API = 'http://api.420chan.org'
 
 def get_common_terms(posts):
-    posts = ' '.join(posts)
-    print Counter(test.split()).most_common()
+    comments = ' '.join([pst.com.replace('\n', ' ').replace('\r', '') for pst in posts])
+    print Counter(comments.split()).most_common()
 
 class Board(object):
     """
@@ -29,7 +29,7 @@ class Thread(object):
         self.posts, self.subject = self.get_posts(requests.get(self.base_url).json()['posts'])
 
     def __str__(self):
-        return "[{0}]: {1}".format(self.thread_id, self.subject)
+        return ">>{0} {1}".format(self.thread_id, self.subject)
 
     def get_posts(self, posts):
         _posts = []
@@ -40,6 +40,7 @@ class Thread(object):
                 _subject = p.sub
             except:
                 pass
+            _posts.append(p)
         return _posts, _subject
 
 class Post(object):
@@ -47,12 +48,16 @@ class Post(object):
     Return an instance containing individual post information.
     """
     def __init__(self, post_info):
-        self.original_post = False
         for opt, val in post_info.iteritems():
-            setattr(self, opt, val)   
+            setattr(self, opt, val)
+            print opt  
+
+    def __str__(self):
+       return ">>{0}".format(self.no)
 
 
 #lol = Board('wooo')
 #print lol.threads
 thread = Thread('wooo', '3159492')
-print(thread)
+posts = thread.posts
+get_common_terms(posts)
