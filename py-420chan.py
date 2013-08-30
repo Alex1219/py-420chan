@@ -29,21 +29,34 @@ class Board(object):
     """
     Return an instance containing thread information for a particular board.
     """
-    def __init__(self, board, detailed=False):
-        self.base_url = "{0}/{1}/{2}.json".format(API, board, 
-                                        'catalog' if detailed else 'threads')
-        self.threads = requests.get(self.base_url).json()
+    def __init__(self, board, catalog=False):
+        self.board = board
+        self.base_url = "{0}/{1}/{2}.json".format(API, self.board, 
+                                        'catalog' if catalog else 'threads')
+        self.json = requests.get(self.base_url).json()
+        self.threads = self.get_threads()
 
+    def __str__(self):
+        return "/{0}/ ({1})".format(self.board, len(self.threads))
+
+    def get_threads(self):
+        _threads = []
+        x = 0
+        for pg in self.json:
+            for t in pg['threads']:
+                _threads.append(Thread(self.board, t['no']))
+                x+=1
+            if x > 0:
+                return _threads
 
 
 class Thread(object):
-    """
-    Return an instance containing post information for a particular thread.
-    """
-    def __init__(self, board, thread_id):
-        self.base_url = "{0}/{1}/res/{2}.json".format(API, board, thread_id)
-        self.thread_id = thread_id
-        self.posts, self.subject = self.get_posts(requests.get(self.base_url).json()['posts'])
+
+    def __init__(self, board, _id):
+        self.base_url = "{0}/{1}/res/{2}.json".format(API, board, _id)
+        self._id = _id
+        self.json = requests.get(self.base_url).json()['posts']
+        self.posts, self.subject = self.get_posts(self.json)
 
     def __str__(self):
         return ">>{0} {1}".format(self.thread_id, self.subject)
@@ -51,7 +64,7 @@ class Thread(object):
     def get_posts(self, posts):
         _posts = []
         _subject = ''
-        for pst in posts:
+        for pst in self.json:
             p = Post(pst)
             try:
                 _subject = p.sub
@@ -59,6 +72,7 @@ class Thread(object):
                 pass
             _posts.append(p)
         return _posts, _subject
+
 
 class Post(object):
     """
@@ -71,20 +85,24 @@ class Post(object):
     def __str__(self):
        return ">>{0}".format(self.no)
 
-all_threads = []
-all_posts = []
-all_comments = []
-board = Board('wooo').threads
-for page in board:
-    page_threads = page['threads']
-    for th in page_threads:
-        all_threads.append(Thread('wooo', th['no']))
-for thread in all_threads:
-    all_posts.append(thread.posts)
 
-for i in all_posts:
-    for j in i:
-        all_comments.append(j.com.replace('\r', '').replace('\n', ''))
+test = Board('wooo')
+print test.threads[0].posts
+
+# all_threads = []
+# all_posts = []
+# all_comments = []
+# board = Board('wooo').threads
+# for page in board:
+#     page_threads = page['threads']
+#     for th in page_threads:
+#         all_threads.append(Thread('wooo', th['no']))
+# for thread in all_threads:
+#     all_posts.append(thread.posts)
+
+# for i in all_posts:
+#     for j in i:
+#         all_comments.append(j.com.replace('\r', '').replace('\n', ''))
 
 #print all_posts
 
