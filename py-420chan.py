@@ -4,26 +4,9 @@ import pprint
 from collections import Counter
 import re
 
+
 API = 'http://api.420chan.org'
 
-# def get_common_terms(comments):
-#     comments = ' '.join(com for com in comments)
-#     comments = comments.replace(',', ' ').replace('.', ' ').replace('?', ' ').replace('"', '')
-#     c = Counter(comments.split()).most_common()
-#     output = open('output.txt', 'w')
-#     for i in c:
-#         if i[1] > 5:
-#             if isinstance(i[0], unicode):
-#                 term = i[0].encode('ascii', 'ignore')
-#             else:
-#                 term = i[0]
-#             if isinstance(i[1], unicode):
-#                 n = i[1].encode('ascii', 'ignore')
-#             else:
-#                 n = i[1]
-#             s = "{0} ({1})\n".format(term, n)
-#             output.write(s)
-#     output.close()
 
 class Board(object):
     """
@@ -35,6 +18,7 @@ class Board(object):
         self.base_url = "{0}/{1}/{2}.json".format(API, self.board, 
                                         'catalog' if catalog else 'threads')
         self.json = requests.get(self.base_url).json()
+        print("Gathering threads from {0} page(s) on {1}".format(self.pages, self.board))
         self.threads = self.get_threads()
 
     def __str__(self):
@@ -46,31 +30,34 @@ class Board(object):
         for pg in self.json:
             for t in pg['threads']:
                 _threads.append(Thread(self.board, t['no']))
-                x+=1
+            x+=1
             if x == self.pages:
+                print("{0} threads acquired".format(len(_threads)))
                 return _threads
 
 
-class Thread(object):
 
-    def __init__(self, board, _id):
-        self.base_url = "{0}/{1}/res/{2}.json".format(API, board, _id)
-        self._id = _id
+
+class Thread(object):
+    """
+    Return an instance containing thread information for a particular board.
+    """
+    def __init__(self, board, no):
+        self.base_url = "{0}/{1}/res/{2}.json".format(API, board, no)
+        self.no = no
         self.json = requests.get(self.base_url).json()['posts']
         self.posts, self.subject = self.get_posts(self.json)
 
     def __str__(self):
-        return ">>{0} {1}".format(self.thread_id, self.subject)
+        return ">>{0} {1}".format(self.no, self.subject)
 
     def get_posts(self, posts):
         _posts = []
         _subject = ''
         for pst in self.json:
             p = Post(pst)
-            try:
+            if p.no == self.no:
                 _subject = p.sub
-            except:
-                pass
             _posts.append(p)
         return _posts, _subject
 
@@ -99,7 +86,9 @@ class Post(object):
 
 def main():
     woo = Board('wooo')
-    print woo.threads
+    woo_threads = woo.threads
+    for thread in woo_threads:
+        print(thread)
 
 
 if __name__ == '__main__':
