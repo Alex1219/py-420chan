@@ -36,8 +36,6 @@ class Board(object):
                 return _threads
 
 
-
-
 class Thread(object):
     """
     Return an instance containing thread information for a particular board.
