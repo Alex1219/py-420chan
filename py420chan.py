@@ -4,108 +4,90 @@ import pprint
 from collections import Counter
 import re
 
+
 API = 'http://api.420chan.org'
 
-# def get_common_terms(comments):
-#     comments = ' '.join(com for com in comments)
-#     comments = comments.replace(',', ' ').replace('.', ' ').replace('?', ' ').replace('"', '')
-#     c = Counter(comments.split()).most_common()
-#     output = open('output.txt', 'w')
-#     for i in c:
-#         if i[1] > 5:
-#             if isinstance(i[0], unicode):
-#                 term = i[0].encode('ascii', 'ignore')
-#             else:
-#                 term = i[0]
-#             if isinstance(i[1], unicode):
-#                 n = i[1].encode('ascii', 'ignore')
-#             else:
-#                 n = i[1]
-#             s = "{0} ({1})\n".format(term, n)
-#             output.write(s)
-#     output.close()
 
 class Board(object):
     """
     Return an instance containing thread information for a particular board.
     """
-    def __init__(self, board, detailed=False):
-        self.base_url = "{0}/{1}/{2}.json".format(API, board, 
-                                        'catalog' if detailed else 'threads')
-        self.threads = requests.get(self.base_url).json()
+    def __init__(self, board, pages=1, catalog=False):
+        self.board = board
+        self.pages = pages
+        self.base_url = "{0}/{1}/{2}.json".format(API, self.board, 
+                                        'catalog' if catalog else 'threads')
+        self.json = requests.get(self.base_url).json()
+        print("Gathering threads from {0} page(s) on {1}".format(self.pages, self.board))
+        self.threads = self.get_threads()
 
+    def __str__(self):
+        return "/{0}/ ({1})".format(self.board, len(self.threads))
+
+    def get_threads(self):
+        _threads = []
+        x = 0
+        for pg in self.json:
+            for t in pg['threads']:
+                _threads.append(Thread(self.board, t['no']))
+            x+=1
+            if x == self.pages:
+                print("{0} threads acquired".format(len(_threads)))
+                return _threads
 
 
 class Thread(object):
     """
-    Return an instance containing post information for a particular thread.
+    Return an instance containing thread information for a particular board.
     """
-    def __init__(self, board, thread_id):
-        self.base_url = "{0}/{1}/res/{2}.json".format(API, board, thread_id)
-        self.thread_id = thread_id
-        self.posts, self.subject = self.get_posts(requests.get(self.base_url).json()['posts'])
+    def __init__(self, board, no):
+        self.base_url = "{0}/{1}/res/{2}.json".format(API, board, no)
+        self.no = no
+        self.json = requests.get(self.base_url).json()['posts']
+        self.posts, self.subject = self.get_posts(self.json)
 
     def __str__(self):
-        return ">>{0} {1}".format(self.thread_id, self.subject)
+        return ">>{0} {1}".format(self.no, self.subject)
 
     def get_posts(self, posts):
         _posts = []
         _subject = ''
-        for pst in posts:
+        for pst in self.json:
             p = Post(pst)
-            try:
+            if p.no == self.no:
                 _subject = p.sub
-            except:
-                pass
             _posts.append(p)
         return _posts, _subject
+
 
 class Post(object):
     """
     Return an instance containing individual post information.
     """
-    def __init__(self, post_info):
-        for opt, val in post_info.iteritems():
+    def __init__(self, post):
+        self.sub = None
+        self.tn_h = None
+        self.tn_w = None
+        self.h = None
+        self.w = None
+        self.fsize = None
+        self.filename = None
+        self.ext = None
+        self.resto = None
+        self.trip = None
+        for opt, val in post.iteritems():
             setattr(self, opt, val)  
 
     def __str__(self):
        return ">>{0}".format(self.no)
 
-all_threads = []
-all_posts = []
-all_comments = []
-board = Board('wooo').threads
-for page in board:
-    page_threads = page['threads']
-    for th in page_threads:
-        all_threads.append(Thread('wooo', th['no']))
-for thread in all_threads:
-    all_posts.append(thread.posts)
 
-for i in all_posts:
-    for j in i:
-        all_comments.append(j.com.replace('\r', '').replace('\n', ''))
-
-#print all_posts
+def main():
+    woo = Board('wooo')
+    woo_threads = woo.threads
+    for thread in woo_threads:
+        print(thread)
 
 
-# for post in all_posts:
-#     all_comments.append(post.com)
-# print all_comments
-
-
-
-    #for th in page_threads:
-    #print page
-    #print x
-       # _threads = [thread['no'] for thread in page_threads]
-      #  print _threads
-    #print page_threads
-# for th in all_threads:
-#     print th.keys()
-#     _th = Thread('wooo', th['no']).posts
-#     posts.append(_th)
-# print posts
-# thread = Thread('wooo', '3159492')
-# posts = thread.posts
-# get_common_terms(all_comments)
+if __name__ == '__main__':
+    main()
