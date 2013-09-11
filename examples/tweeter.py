@@ -3,16 +3,14 @@ import random
 import re
 import time
 from py420chan import py420chan as wooo
+
 consumer_key=''
 consumer_secret=''
 access_token='' 
 access_token_secret=''
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
-
 api = tweepy.API(auth)
-
-
 
 
 def get_posts():
@@ -32,13 +30,13 @@ def clean_posts():
         elif len(p) > 140:
             pass
         else:
-            p = p.replace('>>', '')
-            p = re.sub("\d{7}", "", p)
+            p = re.sub("\d{7}", "", p).replace('>>', '')
             _posts.append(p)
     return _posts
 
 
 if __name__ == "__main__":
+    
     posts = clean_posts()
     api = tweepy.API(auth)
     while True:

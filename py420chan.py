@@ -1,8 +1,5 @@
 import requests
 import json
-import pprint
-from collections import Counter
-import re
 
 
 API = 'http://api.420chan.org'
@@ -38,7 +35,7 @@ class Board(object):
 
 class Thread(object):
     """
-    Return an instance containing thread information for a particular board.
+    Return an instance containing post information for a particular thread.
     """
     def __init__(self, board, no):
         self.base_url = "{0}/{1}/res/{2}.json".format(API, board, no)
