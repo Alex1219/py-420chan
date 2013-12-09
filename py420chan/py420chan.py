@@ -34,27 +34,73 @@ class Board(object):
 
 
 class Thread(object):
-    """
-    Return an instance containing post information for a particular thread.
-    """
-    def __init__(self, board, no):
-        self.base_url = "{0}/{1}/res/{2}.json".format(API, board, no)
-        self.no = no
-        self.json = requests.get(self.base_url).json()['posts']
-        self.posts, self.subject = self.get_posts(self.json)
-
-    def __str__(self):
-        return ">>{0} {1}".format(self.no, self.subject)
-
-    def get_posts(self, posts):
-        _posts = []
-        _subject = ''
-        for pst in self.json:
-            p = Post(pst)
-            if p.no == self.no:
-                _subject = p.sub
-            _posts.append(p)
-        return _posts, _subject
+	""" 
+	Return an instance containing post information for a particular thread.
+	
+	"""
+	
+	def __init__(self, board, no):
+		self.board = board
+		self.no = no
+		self.base_url = "{0}/{1}/res/{2}.json".format(API, board, no)
+		self.threadjson =  requests.get(self.base_url).json()
+		
+		
+	@property
+	def now(self):
+		return self.threadjson['posts'][0]['now']
+		
+	@property
+	def name(self):
+		return self.threadjson['posts'][0]['name']
+		
+	@property
+	def id(self):
+		return self.threadjson['posts'][0]['id']
+	
+	@property
+	def sub(self):
+		return self.threadjson['posts'][0]['sub']
+	
+	@property
+	def com(self):
+		return self.threadjson['posts'][0]['com']
+	
+	@property
+	def filename(self):
+		return self.threadjson['posts'][0]['filename']
+	
+	@property
+	def ext(self):
+		return self.threadjson['posts'][0]['ext']
+		
+	@property
+	def w(self):
+		return self.threadjson['posts'][0]['w']
+	
+	@property
+	def h(self):
+		return self.threadjson['posts'][0]['h']
+	
+	@property
+	def h(self):
+		return self.threadjson['posts'][0]['h']
+	
+	@property
+	def tn_h(self):
+		return self.threadjson['posts'][0]['tn_h']
+	
+	@property
+	def time(self):
+		return self.threadjson['posts'][0]['time']
+	
+	@property
+	def fsize(self):
+		return self.threadjson['posts'][0]['fsize']
+	
+	@property
+	def replies(self):
+		return self.threadjson['posts'][0]['replies']
 
 
 class Post(object):
@@ -77,14 +123,3 @@ class Post(object):
 
     def __str__(self):
        return ">>{0}".format(self.no)
-
-
-def main():
-    woo = Board('wooo')
-    woo_threads = woo.threads
-    for thread in woo_threads:
-        print(thread)
-
-
-if __name__ == '__main__':
-    main()
