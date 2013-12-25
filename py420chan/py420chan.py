@@ -1,37 +1,41 @@
 import requests
 import json
 
-
 API = 'http://api.420chan.org'
 
-
 class Board(object):
-    """
-    Return an instance containing thread information for a particular board.
-    """
-    def __init__(self, board, pages=1, catalog=False):
-        self.board = board
-        self.pages = pages
-        self.base_url = "{0}/{1}/{2}.json".format(API, self.board, 
-                                        'catalog' if catalog else 'threads')
-        self.json = requests.get(self.base_url).json()
-        print("Gathering threads from {0} page(s) on {1}".format(self.pages, self.board))
-        self.threads = self.get_threads()
-
-    def __str__(self):
-        return "/{0}/ ({1})".format(self.board, len(self.threads))
-
-    def get_threads(self):
-        _threads = []
-        x = 0
-        for pg in self.json:
-            for t in pg['threads']:
-                _threads.append(Thread(self.board, t['no']))
-            x+=1
-            if x == self.pages:
-                print("{0} threads acquired".format(len(_threads)))
-                return _threads
-
+	"""
+	Return an instance containing thread information for a particular board.
+	"""
+	
+	def __init__(self,board, catalog=False):
+		self.board = board
+		self.catjson = requests.get("http://api.420chan.org/categories.json").json()['categories']
+		self.boards = requests.get("http://api.420chan.org/boards.json").json()['boards']
+		self.base_url = "{0}/{1}/{2}.json".format(API, board, 'catalog' if catalog else 'threads')
+		
+	def threads(self,pages):
+		_threads = []
+		totalpage = 0
+		page = requests.get(self.base_url).json()
+		while totalpage < pages:
+			newpage  = page[totalpage]['threads']
+			for thread in newpage:
+				_threads.append(json.dumps(thread))
+				totalpage += 1
+			return _threads
+	
+	def boardinfo(self):
+		for board_ in self.boards:
+			if  board_['board'].encode('utf-8') ==  self.board:
+				return json.dumps(board_)
+	
+	def category(self,catnum):
+		if catnum > 7:
+			return None
+		else:
+			return json.dumps(self.catjson[catnum-1])
+	
 
 class Thread(object):
 	""" 
@@ -119,7 +123,4 @@ class Post(object):
         self.resto = None
         self.trip = None
         for opt, val in post.iteritems():
-            setattr(self, opt, val)  
-
-    def __str__(self):
-       return ">>{0}".format(self.no)
+            setattr(self, opt, val)
