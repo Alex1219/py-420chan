@@ -1,10 +1,10 @@
 py-420chan
 =========
 
-Python wrapper for the 420chan JSON API
+A Python wrapper for the 420chan JSON API
 
 todo
 ====
 
-- Add neat features/examples.
-- Add helper functions for individual post/thread/board information
+- Add documentation and examples
+- Etend the wrapper so the entire API is supported
