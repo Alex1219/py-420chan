@@ -87,10 +87,6 @@ class Thread(object):
 		return self.threadjson['posts'][0]['h']
 	
 	@property
-	def h(self):
-		return self.threadjson['posts'][0]['h']
-	
-	@property
 	def tn_h(self):
 		return self.threadjson['posts'][0]['tn_h']
 	
