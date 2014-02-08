@@ -7,4 +7,4 @@ todo
 ====
 
 - Add documentation and examples
-- Etend the wrapper so the entire API is supported
+- Extend the wrapper so the entire API is supported
