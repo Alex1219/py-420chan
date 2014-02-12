@@ -26,11 +26,19 @@ class Board(object):
 			return _threads
 	
 	def boardinfo(self):
+		"""
+		Get category information on the board
+		"""
+		
 		for board_ in self.boards:
 			if  board_['board'].encode('utf-8') ==  self.board:
 				return json.dumps(board_)
 	
 	def category(self,catnum):
+		"""
+		Get information on the caregory selected
+		"""
+		
 		if catnum > 7:
 			return None
 		else:
